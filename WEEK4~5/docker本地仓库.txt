@@ -1,0 +1,689 @@
+[root@localhost ~]# docker info    
+//检查docker状态
+
+Client: Docker Engine - Community
+ Version:    26.1.4
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  buildx: Docker Buildx (Docker Inc.)
+    Version:  v0.14.1
+    Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+  compose: Docker Compose (Docker Inc.)
+    Version:  v2.27.1
+    Path:     /usr/libexec/docker/cli-plugins/docker-compose
+
+Server:
+ Containers: 7
+  Running: 0
+  Paused: 0
+  Stopped: 7
+ Images: 4
+ Server Version: 26.1.4
+ Storage Driver: overlay2
+  Backing Filesystem: xfs
+  Supports d_type: true
+  Using metacopy: false
+  Native Overlay Diff: true
+  userxattr: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 1
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: d2d58213f83a351ca8f528a95fbd145f5654e957
+ runc version: v1.1.12-0-g51d5e94
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: builtin
+ Kernel Version: 3.10.0-1160.el7.x86_64
+ Operating System: CentOS Linux 7 (Core)
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 2
+ Total Memory: 1.777GiB
+ Name: localhost.localdomain
+ ID: 2d8614ef-f7c6-4570-9fb1-21c334525f37
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+ Registry Mirrors:
+  https://docker.m.daocloud.io/
+  https://mirror.baidubce.com/
+  https://dockerproxy.com/
+ Live Restore Enabled: false
+
+[root@localhost ~]# systemctl start docker
+//启动docker服务
+
+[root@localhost ~]# docker info
+//检查docker状态
+Client: Docker Engine - Community
+ Version:    26.1.4
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  buildx: Docker Buildx (Docker Inc.)
+    Version:  v0.14.1
+    Path:     /usr/libexec/docker/cli-plugins/docker-buildx
+  compose: Docker Compose (Docker Inc.)
+    Version:  v2.27.1
+    Path:     /usr/libexec/docker/cli-plugins/docker-compose
+
+Server:
+ Containers: 7
+  Running: 0
+  Paused: 0
+  Stopped: 7
+ Images: 4
+ Server Version: 26.1.4
+ Storage Driver: overlay2
+  Backing Filesystem: xfs
+  Supports d_type: true
+  Using metacopy: false
+  Native Overlay Diff: true
+  userxattr: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 1
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local splunk syslog
+ Swarm: inactive
+ Runtimes: io.containerd.runc.v2 runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: d2d58213f83a351ca8f528a95fbd145f5654e957
+ runc version: v1.1.12-0-g51d5e94
+ init version: de40ad0
+ Security Options:
+  seccomp
+   Profile: builtin
+ Kernel Version: 3.10.0-1160.el7.x86_64
+ Operating System: CentOS Linux 7 (Core)
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 2
+ Total Memory: 1.777GiB
+ Name: localhost.localdomain
+ ID: 2d8614ef-f7c6-4570-9fb1-21c334525f37
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+ Registry Mirrors:
+  https://docker.m.daocloud.io/
+  https://mirror.baidubce.com/
+  https://dockerproxy.com/
+ Live Restore Enabled: false
+
+[root@localhost ~]# docker pull registry
+//拉取docker镜像registry
+
+Using default tag: latest
+latest: Pulling from library/registry
+bc1da058f299: Pull complete 
+3e2f893a11ee: Pull complete 
+3aeded8eec5f: Pull complete 
+a8100d968019: Pull complete 
+7369e5bd3505: Pull complete 
+Digest: sha256:6c5666b861f3505b116bb9aa9b25175e71210414bd010d92035ff64018f9457e
+Status: Downloaded newer image for registry:latest
+docker.io/library/registry:latest
+[root@localhost ~]# docker imags
+docker: 'imags' is not a docker command.
+See 'docker --help'
+
+[root@localhost ~]# docker images
+//查看镜像列表
+REPOSITORY     TAG       IMAGE ID       CREATED       SIZE
+atMain/myubt   1.3       d6ac6af504c8   8 days ago    208MB
+tomcat         latest    c4f54354c57b   2 weeks ago   435MB
+redis          latest    4326c43a061b   2 weeks ago   139MB
+registry       latest    99b916d8206b   3 weeks ago   57.7MB
+ubuntu         latest    493218ed0f40   5 weeks ago   78.1MB
+
+[root@localhost ~]# docker run -d -p 5000:5000 -v /zzyyuse/myregistry/:/tmp/registry --privileged=true registry
+//启动 Docker 容器，将本地的 /zzyyuse/myregistry/ 目录挂载到容器中的 /tmp/registry 目录，并公开 5000 端口用于访问私有 registry。
+遇到的困难：挂载路径错误，tmp/registry 不是绝对路径，导致挂载失败。Docker 提示需要使用绝对路径。
+
+36dbbdee62d0fb8e70260238d788433413e9991c98b5a81fad7dcd028276c6ba
+[root@localhost ~]# docker ps
+//查看容器运行状态
+
+CONTAINER ID   IMAGE      COMMAND                   CREATED         STATUS         PORTS                                       NAMES
+36dbbdee62d0   registry   "/entrypoint.sh /etc…"   6 seconds ago   Up 5 seconds   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_jones
+[root@localhost ~]# docker run -it /bin/bash
+启动一个新的ubuntu
+
+docker: invalid reference format.
+See 'docker run --help'.
+[root@localhost ~]# docker run -it ubuntu /bin/bash
+root@0f6c83f8660b:/# vim a.txt
+bash: vim: command not found
+root@0f6c83f8660b:/# apt-get update
+Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+Get:3 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1207 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+Get:7 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1857 kB]
+Get:8 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [3196 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]       
+Get:10 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]       
+Get:11 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [34.8 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]      
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [38.1 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2016 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [3381 kB]
+Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [2240 kB]   
+Get:17 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [34.6 kB]
+Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.5 kB] 
+Fetched 36.3 MB in 15s (2374 kB/s)                                                    
+Reading package lists... Done
+root@0f6c83f8660b:/# apt-get install net-tools
+//更新apt源并安装net-tools
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  net-tools
+0 upgraded, 1 newly installed, 0 to remove and 8 not upgraded.
+Need to get 204 kB of archives.
+After this operation, 811 kB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 net-tools amd64 2.10-0.1ubuntu4.4 [204 kB]
+Fetched 204 kB in 2s (89.6 kB/s)    
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package net-tools.
+(Reading database ... 4381 files and directories currently installed.)
+Preparing to unpack .../net-tools_2.10-0.1ubuntu4.4_amd64.deb ...
+Unpacking net-tools (2.10-0.1ubuntu4.4) ...
+Setting up net-tools (2.10-0.1ubuntu4.4) ...
+root@0f6c83f8660b:/# ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.17.0.3  netmask 255.255.0.0  broadcast 172.17.255.255
+        ether 02:42:ac:11:00:03  txqueuelen 0  (Ethernet)
+        RX packets 2216  bytes 36588785 (36.5 MB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 1571  bytes 89296 (89.2 KB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+root@0f6c83f8660b:/# [root@zzyy ~]#
+bash: [root@zzyy: command not found
+root@0f6c83f8660b:/# [root@localhost ~]# 
+[root@localhost ~]# docker ps
+CONTAINER ID   IMAGE      COMMAND                   CREATED          STATUS          PORTS                                       NAMES
+0f6c83f8660b   ubuntu     "/bin/bash"               34 minutes ago   Up 34 minutes                                               romantic_turing
+36dbbdee62d0   registry   "/entrypoint.sh /etc…"   35 minutes ago   Up 35 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_jones
+
+[root@localhost ~]# docker commit -m="ifconfig cmd add" -a="zzyy" 0f6c83f8660b zzyyubuntu:1.2
+//提交当前容器的更改并生成一个新的镜像，命名为 zzyyubuntu:1.2
+
+sha256:0e5adac8f870ff54027ea0eea883a019edc0a9e61e7682f0d379d9c5c7bf6f91
+[root@localhost ~]# docker images
+REPOSITORY     TAG       IMAGE ID       CREATED          SIZE
+zzyyubuntu     1.2       0e5adac8f870   13 seconds ago   138MB
+atMain/myubt   1.3       d6ac6af504c8   8 days ago       208MB
+tomcat         latest    c4f54354c57b   2 weeks ago      435MB
+redis          latest    4326c43a061b   2 weeks ago      139MB
+registry       latest    99b916d8206b   3 weeks ago      57.7MB
+ubuntu         latest    493218ed0f40   5 weeks ago      78.1MB
+[root@localhost ~]# docker ps
+CONTAINER ID   IMAGE      COMMAND                   CREATED          STATUS          PORTS                                       NAMES
+0f6c83f8660b   ubuntu     "/bin/bash"               36 minutes ago   Up 36 minutes                                               romantic_turing
+36dbbdee62d0   registry   "/entrypoint.sh /etc…"   37 minutes ago   Up 37 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_jones
+
+[root@localhost ~]# docker stop 0f6c83f8660b
+//停止容器 0f6c83f8660b，以便重新启动时验证镜像的正确性
+
+0f6c83f8660b
+[root@localhost ~]# docker run -it 0e5adac8f870 /bin/bash
+root@58a9b266d793:/# 
+root@58a9b266d793:/# 
+root@58a9b266d793:/# ifconfig
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.17.0.3  netmask 255.255.0.0  broadcast 172.17.255.255
+        ether 02:42:ac:11:00:03  txqueuelen 0  (Ethernet)
+        RX packets 7  bytes 586 (586.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+root@58a9b266d793:/# exit
+exit
+[root@localhost ~]# docker images
+REPOSITORY     TAG       IMAGE ID       CREATED         SIZE
+zzyyubuntu     1.2       0e5adac8f870   3 minutes ago   138MB
+atMain/myubt   1.3       d6ac6af504c8   8 days ago      208MB
+tomcat         latest    c4f54354c57b   2 weeks ago     435MB
+redis          latest    4326c43a061b   2 weeks ago     139MB
+registry       latest    99b916d8206b   3 weeks ago     57.7MB
+ubuntu         latest    493218ed0f40   5 weeks ago     78.1MB
+[root@localhost ~]# docker ps
+CONTAINER ID   IMAGE      COMMAND                   CREATED          STATUS          PORTS                                       NAMES
+36dbbdee62d0   registry   "/entrypoint.sh /etc…"   39 minutes ago   Up 39 minutes   0.0.0.0:5000->5000/tcp, :::5000->5000/tcp   interesting_jones
+[root@localhost ~]# ifconfig
+docker0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        inet6 fe80::42:a2ff:fe2c:7684  prefixlen 64  scopeid 0x20<link>
+        ether 02:42:a2:2c:76:84  txqueuelen 0  (Ethernet)
+        RX packets 1571  bytes 67302 (65.7 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 2221  bytes 36589897 (34.8 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ens33: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.9.129  netmask 255.255.255.0  broadcast 192.168.9.255
+        inet6 fe80::9c22:1257:3687:f474  prefixlen 64  scopeid 0x20<link>
+        ether 00:0c:29:92:71:b1  txqueuelen 1000  (Ethernet)
+        RX packets 39035  bytes 58079409 (55.3 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 2802  bytes 206233 (201.3 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 48  bytes 4080 (3.9 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 48  bytes 4080 (3.9 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+vethd9e4551: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet6 fe80::c6f:4cff:fe09:4a63  prefixlen 64  scopeid 0x20<link>
+        ether 0e:6f:4c:09:4a:63  txqueuelen 0  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 22  bytes 2466 (2.4 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+virbr0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        inet 192.168.122.1  netmask 255.255.255.0  broadcast 192.168.122.255
+        ether 52:54:00:f6:ff:b2  txqueuelen 1000  (Ethernet)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+[root@localhost ~]# curl -XGET http://192.168.122.1:5000/v2/_catalog
+//查看私有仓库中已经存在的镜像，确认 zzyyubuntu 是否已经上传
+
+{"repositories":[]}
+[root@localhost ~]# docker tag zzyyubantu:1.2 192.168.122.1:5000/zzyyubuntu:1.2
+Error response from daemon: No such image: zzyyubantu:1.2
+[root@localhost ~]# docker tag zzyyubuntu:1.2 192.168.122.1:5000/zzyyubuntu:1.2
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# docker images
+REPOSITORY                      TAG       IMAGE ID       CREATED         SIZE
+192.168.122.1:5000/zzyyubuntu   1.2       0e5adac8f870   7 minutes ago   138MB
+zzyyubuntu                      1.2       0e5adac8f870   7 minutes ago   138MB
+atMain/myubt                    1.3       d6ac6af504c8   8 days ago      208MB
+tomcat                          latest    c4f54354c57b   2 weeks ago     435MB
+redis                           latest    4326c43a061b   2 weeks ago     139MB
+registry                        latest    99b916d8206b   3 weeks ago     57.7MB
+ubuntu                          latest    493218ed0f40   5 weeks ago     78.1MB
+[root@localhost ~]# vim /etc/docker/daemon.json
+[root@localhost ~]# systemctl restart docker
+Job for docker.service failed because the control process exited with error code. See "systemctl status docker.service" and "journalctl -xe" for details.
+[root@localhost ~]# systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)
+   Active: failed (Result: start-limit) since 日 2026-02-22 19:09:38 CST; 22s ago
+     Docs: https://docs.docker.com
+  Process: 4643 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock (code=exited, status=1/FAILURE)
+ Main PID: 4643 (code=exited, status=1/FAILURE)
+
+2月 22 19:09:36 localhost.localdomain systemd[1]: docker.service: main process exi...E
+2月 22 19:09:36 localhost.localdomain systemd[1]: Failed to start Docker Applicati....
+2月 22 19:09:36 localhost.localdomain systemd[1]: Unit docker.service entered fail....
+2月 22 19:09:36 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:09:38 localhost.localdomain systemd[1]: docker.service holdoff time over....
+2月 22 19:09:38 localhost.localdomain systemd[1]: Stopped Docker Application Conta....
+2月 22 19:09:38 localhost.localdomain systemd[1]: start request repeated too quick...e
+2月 22 19:09:38 localhost.localdomain systemd[1]: Failed to start Docker Applicati....
+2月 22 19:09:38 localhost.localdomain systemd[1]: Unit docker.service entered fail....
+2月 22 19:09:38 localhost.localdomain systemd[1]: docker.service failed.
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@localhost ~]# systemctl restart docker
+Job for docker.service failed because start of the service was attempted too often. See "systemctl status docker.service" and "journalctl -xe" for details.
+To force a start use "systemctl reset-failed docker.service" followed by "systemctl start docker.service" again.
+[root@localhost ~]# systemctl start docker
+Job for docker.service failed because the control process exited with error code. See "systemctl status docker.service" and "journalctl -xe" for details.
+[root@localhost ~]# systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)
+   Active: failed (Result: start-limit) since 日 2026-02-22 19:10:39 CST; 771ms ago
+     Docs: https://docs.docker.com
+  Process: 4720 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock (code=exited, status=1/FAILURE)
+ Main PID: 4720 (code=exited, status=1/FAILURE)
+
+2月 22 19:10:37 localhost.localdomain systemd[1]: Failed to start Docker Applicati....
+2月 22 19:10:37 localhost.localdomain systemd[1]: Unit docker.service entered fail....
+2月 22 19:10:37 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:10:39 localhost.localdomain systemd[1]: docker.service holdoff time over....
+2月 22 19:10:39 localhost.localdomain systemd[1]: Stopped Docker Application Conta....
+2月 22 19:10:39 localhost.localdomain systemd[1]: start request repeated too quick...e
+2月 22 19:10:39 localhost.localdomain systemd[1]: Failed to start Docker Applicati....
+2月 22 19:10:39 localhost.localdomain systemd[1]: Unit docker.service entered fail....
+2月 22 19:10:39 localhost.localdomain systemd[1]: docker.service failed.
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@localhost ~]# journalctl -xe | grep docke
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 18:09:34 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:34.801248382+08:00" level=info msg="Starting up"
+2月 22 18:09:35 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:35.126478556+08:00" level=info msg="[graphdriver] using prior storage driver: overlay2"
+2月 22 18:09:35 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:35.199983076+08:00" level=info msg="Loading containers: start."
+2月 22 18:09:35 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:35.288349770+08:00" level=info msg="Firewalld: docker zone already exists, returning"
+2月 22 18:09:35 localhost.localdomain NetworkManager[877]: <info>  [1771754975.7287] manager: (docker0): new Bridge device (/org/freedesktop/NetworkManager/Devices/5)
+2月 22 18:09:35 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:35.914597028+08:00" level=info msg="Firewalld: interface docker0 already part of docker zone, returning"
+2月 22 18:09:36 localhost.localdomain kernel: IPv6: ADDRCONF(NETDEV_UP): docker0: link is not ready
+2月 22 18:09:36 localhost.localdomain avahi-daemon[751]: Joining mDNS multicast group on interface docker0.IPv4 with address 172.17.0.1.
+2月 22 18:09:36 localhost.localdomain avahi-daemon[751]: New relevant interface docker0.IPv4 for mDNS.
+2月 22 18:09:36 localhost.localdomain avahi-daemon[751]: Registering new address record for 172.17.0.1 on docker0.IPv4.
+2月 22 18:09:36 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:36.401175656+08:00" level=info msg="Default bridge (docker0) is assigned with an IP address 172.17.0.0/16. Daemon option --bip can be used to set a preferred IP address"
+2月 22 18:09:36 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:36.633784170+08:00" level=info msg="Firewalld: interface docker0 already part of docker zone, returning"
+2月 22 18:09:36 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:36.782802907+08:00" level=info msg="Loading containers: done."
+2月 22 18:09:36 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:36.809375532+08:00" level=info msg="Docker daemon" commit=de5c9cf containerd-snapshotter=false storage-driver=overlay2 version=26.1.4
+2月 22 18:09:36 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:36.809572321+08:00" level=info msg="Daemon has completed initialization"
+2月 22 18:09:36 localhost.localdomain dockerd[1395]: time="2026-02-22T18:09:36.856649656+08:00" level=info msg="API listen on /run/docker.sock"
+-- Subject: Unit docker.service has finished start-up
+-- Unit docker.service has finished starting up.
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered blocking state
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered disabled state
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered blocking state
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered forwarding state
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered disabled state
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered blocking state
+2月 22 18:20:49 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered forwarding state
+2月 22 18:20:49 localhost.localdomain kernel: IPv6: ADDRCONF(NETDEV_CHANGE): docker0: link becomes ready
+2月 22 18:20:49 localhost.localdomain NetworkManager[877]: <info>  [1771755649.9114] device (docker0): carrier: link connected
+2月 22 18:20:51 localhost.localdomain avahi-daemon[751]: Registering new address record for fe80::42:a2ff:fe2c:7684 on docker0.*.
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered blocking state
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered disabled state
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered blocking state
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered forwarding state
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered disabled state
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered blocking state
+2月 22 18:22:01 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered forwarding state
+2月 22 18:58:41 localhost.localdomain dockerd[1395]: time="2026-02-22T18:58:41.801976541+08:00" level=info msg="Container failed to exit within 10s of signal 15 - using the force" container=0f6c83f8660b64ec86897835d7061a9bf3b7d818fc873303379e13960ea659da spanID=06b6fa495b5fdb32 traceID=6c18e55e628460f4519fb71056fadb16
+2月 22 18:58:41 localhost.localdomain dockerd[1395]: time="2026-02-22T18:58:41.847785914+08:00" level=info msg="ignoring event" container=0f6c83f8660b64ec86897835d7061a9bf3b7d818fc873303379e13960ea659da module=libcontainerd namespace=moby topic=/tasks/delete type="*events.TaskDelete"
+2月 22 18:58:41 localhost.localdomain dockerd[1395]: time="2026-02-22T18:58:41.873647554+08:00" level=warning msg="failed to close stdin: task 0f6c83f8660b64ec86897835d7061a9bf3b7d818fc873303379e13960ea659da not found: not found"
+2月 22 18:58:41 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered disabled state
+2月 22 18:58:41 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered disabled state
+2月 22 18:58:41 localhost.localdomain kernel: docker0: port 2(vethe48be6e) entered disabled state
+2月 22 18:58:41 localhost.localdomain NetworkManager[877]: <info>  [1771757921.9059] device (vethe48be6e): released from master device docker0
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered blocking state
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered disabled state
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered blocking state
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered forwarding state
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered disabled state
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered blocking state
+2月 22 18:59:33 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered forwarding state
+2月 22 19:00:00 localhost.localdomain dockerd[1395]: time="2026-02-22T19:00:00.494549009+08:00" level=info msg="ignoring event" container=58a9b266d7939bb3d0ca922f00e42c38c614257d51b100d185063c19bbd06bce module=libcontainerd namespace=moby topic=/tasks/delete type="*events.TaskDelete"
+2月 22 19:00:00 localhost.localdomain dockerd[1395]: time="2026-02-22T19:00:00.512315055+08:00" level=warning msg="failed to close stdin: task 58a9b266d7939bb3d0ca922f00e42c38c614257d51b100d185063c19bbd06bce not found: not found"
+2月 22 19:00:00 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered disabled state
+2月 22 19:00:00 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered disabled state
+2月 22 19:00:00 localhost.localdomain kernel: docker0: port 2(veth024bfb9) entered disabled state
+2月 22 19:00:00 localhost.localdomain NetworkManager[877]: <info>  [1771758000.5471] device (veth024bfb9): released from master device docker0
+-- Subject: Unit docker.service has begun shutting down
+-- Unit docker.service has begun shutting down.
+2月 22 19:09:31 localhost.localdomain dockerd[1395]: time="2026-02-22T19:09:31.710875335+08:00" level=info msg="Processing signal 'terminated'"
+2月 22 19:09:31 localhost.localdomain dockerd[1395]: time="2026-02-22T19:09:31.753967361+08:00" level=info msg="ignoring event" container=36dbbdee62d0fb8e70260238d788433413e9991c98b5a81fad7dcd028276c6ba module=libcontainerd namespace=moby topic=/tasks/delete type="*events.TaskDelete"
+2月 22 19:09:31 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered disabled state
+2月 22 19:09:31 localhost.localdomain kernel: docker0: port 1(vethd9e4551) entered disabled state
+2月 22 19:09:31 localhost.localdomain NetworkManager[877]: <info>  [1771758571.8416] device (vethd9e4551): released from master device docker0
+2月 22 19:09:31 localhost.localdomain dockerd[1395]: time="2026-02-22T19:09:31.879866713+08:00" level=info msg="stopping event stream following graceful shutdown" error="<nil>" module=libcontainerd namespace=moby
+2月 22 19:09:31 localhost.localdomain dockerd[1395]: time="2026-02-22T19:09:31.882118812+08:00" level=info msg="Daemon shutdown complete"
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 19:09:31 localhost.localdomain dockerd[4622]: unable to configure the Docker daemon with file /etc/docker/daemon.json: invalid character '}' looking for beginning of object key string
+2月 22 19:09:31 localhost.localdomain systemd[1]: docker.service: main process exited, code=exited, status=1/FAILURE
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:09:31 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:09:31 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:09:34 localhost.localdomain systemd[1]: docker.service holdoff time over, scheduling restart.
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 19:09:34 localhost.localdomain dockerd[4636]: unable to configure the Docker daemon with file /etc/docker/daemon.json: invalid character '}' looking for beginning of object key string
+2月 22 19:09:34 localhost.localdomain systemd[1]: docker.service: main process exited, code=exited, status=1/FAILURE
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:09:34 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:09:34 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:09:36 localhost.localdomain systemd[1]: docker.service holdoff time over, scheduling restart.
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 19:09:36 localhost.localdomain dockerd[4643]: unable to configure the Docker daemon with file /etc/docker/daemon.json: invalid character '}' looking for beginning of object key string
+2月 22 19:09:36 localhost.localdomain systemd[1]: docker.service: main process exited, code=exited, status=1/FAILURE
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:09:36 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:09:36 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:09:38 localhost.localdomain systemd[1]: docker.service holdoff time over, scheduling restart.
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+2月 22 19:09:38 localhost.localdomain systemd[1]: start request repeated too quickly for docker.service
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:09:38 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:09:38 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:10:20 localhost.localdomain systemd[1]: start request repeated too quickly for docker.service
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:10:20 localhost.localdomain systemd[1]: docker.service failed.
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 19:10:33 localhost.localdomain dockerd[4700]: unable to configure the Docker daemon with file /etc/docker/daemon.json: invalid character '}' looking for beginning of object key string
+2月 22 19:10:33 localhost.localdomain systemd[1]: docker.service: main process exited, code=exited, status=1/FAILURE
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:10:33 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:10:33 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:10:35 localhost.localdomain systemd[1]: docker.service holdoff time over, scheduling restart.
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 19:10:35 localhost.localdomain dockerd[4713]: unable to configure the Docker daemon with file /etc/docker/daemon.json: invalid character '}' looking for beginning of object key string
+2月 22 19:10:35 localhost.localdomain systemd[1]: docker.service: main process exited, code=exited, status=1/FAILURE
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:10:35 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:10:35 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:10:37 localhost.localdomain systemd[1]: docker.service holdoff time over, scheduling restart.
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+-- Subject: Unit docker.service has begun start-up
+-- Unit docker.service has begun starting up.
+2月 22 19:10:37 localhost.localdomain dockerd[4720]: unable to configure the Docker daemon with file /etc/docker/daemon.json: invalid character '}' looking for beginning of object key string
+2月 22 19:10:37 localhost.localdomain systemd[1]: docker.service: main process exited, code=exited, status=1/FAILURE
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:10:37 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:10:37 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:10:39 localhost.localdomain systemd[1]: docker.service holdoff time over, scheduling restart.
+-- Subject: Unit docker.service has finished shutting down
+-- Unit docker.service has finished shutting down.
+2月 22 19:10:39 localhost.localdomain systemd[1]: start request repeated too quickly for docker.service
+-- Subject: Unit docker.service has failed
+-- Unit docker.service has failed.
+2月 22 19:10:39 localhost.localdomain systemd[1]: Unit docker.service entered failed state.
+2月 22 19:10:39 localhost.localdomain systemd[1]: docker.service failed.
+[root@localhost ~]# nano /etc/docker/daemon.json
+[root@localhost ~]# systemctl daemon-reload
+[root@localhost ~]# systemctl restart docker
+Job for docker.service failed because the control process exited with error code. See "systemctl status docker.service" and "journalctl -xe" for details.
+[root@localhost ~]# systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)
+   Active: failed (Result: start-limit) since 日 2026-02-22 19:15:59 CST; 8s ago
+     Docs: https://docs.docker.com
+  Process: 4907 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock (code=exited, status=1/FAILURE)
+ Main PID: 4907 (code=exited, status=1/FAILURE)
+
+2月 22 19:15:57 localhost.localdomain systemd[1]: Failed to start Docker Applicati....
+2月 22 19:15:57 localhost.localdomain systemd[1]: Unit docker.service entered fail....
+2月 22 19:15:57 localhost.localdomain systemd[1]: docker.service failed.
+2月 22 19:15:59 localhost.localdomain systemd[1]: docker.service holdoff time over....
+2月 22 19:15:59 localhost.localdomain systemd[1]: Stopped Docker Application Conta....
+2月 22 19:15:59 localhost.localdomain systemd[1]: start request repeated too quick...e
+2月 22 19:15:59 localhost.localdomain systemd[1]: Failed to start Docker Applicati....
+2月 22 19:15:59 localhost.localdomain systemd[1]: Unit docker.service entered fail....
+2月 22 19:15:59 localhost.localdomain systemd[1]: docker.service failed.
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@localhost ~]# cat /etc/docker/daemon.json
+i{
+  "registry-mirrors": [
+    "https://docker.m.daocloud.io",
+    "https://mirror.baidubce.com",
+    "https://dockerproxy.com"
+  ],
+"insecure-registries":["192.168.122.1:5000"]
+}
+[root@localhost ~]# vim /etc/docker/daemon.json
+[root@localhost ~]# systemctl daemon-reload
+[root@localhost ~]# systemctl reset-failed docker
+[root@localhost ~]# systemctl restart docker
+[root@localhost ~]# systemctl restart docker
+[root@localhost ~]# systemctl unstats docker
+Unknown operation 'unstats'.
+[root@localhost ~]# systemctl unstat docker
+Unknown operation 'unstat'.
+[root@localhost ~]# systemctl unstart docker
+Unknown operation 'unstart'.
+[root@localhost ~]# systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)
+   Active: active (running) since 日 2026-02-22 19:20:31 CST; 49s ago
+     Docs: https://docs.docker.com
+ Main PID: 5202 (dockerd)
+    Tasks: 13
+   Memory: 28.4M
+   CGroup: /system.slice/docker.service
+           └─5202 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd....
+
+2月 22 19:20:30 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:30.904..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.087..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.107..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.263..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.349..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.422..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.437...4
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.437..."
+2月 22 19:20:31 localhost.localdomain dockerd[5202]: time="2026-02-22T19:20:31.455..."
+2月 22 19:20:31 localhost.localdomain systemd[1]: Started Docker Application Conta....
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@localhost ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+[root@localhost ~]# docker run -d -p 5000:5000 -v/zzyyuse/myregistry/:tmp/registry --privileged=true registry
+docker: Error response from daemon: invalid volume specification: '/zzyyuse/myregistry/:tmp/registry': invalid mount config for type "bind": invalid mount path: 'tmp/registry' mount path must be absolute.
+See 'docker run --help'.
+[root@localhost ~]# docker run -d -p 5000:5000 -v /zzyyuse/myregistry/:tmp/registry --privileged=true regist
+Unable to find image 'regist:latest' locally
+docker: Error response from daemon: Get "https://registry-1.docker.io/v2/": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers).
+See 'docker run --help'.
+[root@localhost ~]# docker run -d -p 5000:5000 -v /zzyyuse/myregistry/:tmp/registry --privileged=true registry
+docker: Error response from daemon: invalid volume specification: '/zzyyuse/myregistry/:tmp/registry': invalid mount config for type "bind": invalid mount path: 'tmp/registry' mount path must be absolute.
+See 'docker run --help'.
+[root@localhost ~]# docker run -d \
+>   -p 5000:5000 \
+>   -v /zzyyuse/myregistry:/var/lib/registry \
+>   --name registry \
+>   registry:2
+Unable to find image 'registry:2' locally
+2: Pulling from library/registry
+44cf07d57ee4: Pull complete 
+bbbdd6c6894b: Pull complete 
+8e82f80af0de: Pull complete 
+3493bf46cdec: Pull complete 
+6d464ea18732: Pull complete 
+Digest: sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+Status: Downloaded newer image for registry:2
+5324311c042baed05b65295a9deba521c4d620b609295537b009f5eb823a731f
+[root@localhost ~]# docker images
+REPOSITORY                      TAG       IMAGE ID       CREATED          SIZE
+192.168.122.1:5000/zzyyubuntu   1.2       0e5adac8f870   31 minutes ago   138MB
+zzyyubuntu                      1.2       0e5adac8f870   31 minutes ago   138MB
+atMain/myubt                    1.3       d6ac6af504c8   8 days ago       208MB
+tomcat                          latest    c4f54354c57b   2 weeks ago      435MB
+redis                           latest    4326c43a061b   2 weeks ago      139MB
+registry                        latest    99b916d8206b   3 weeks ago      57.7MB
+ubuntu                          latest    493218ed0f40   5 weeks ago      78.1MB
+registry                        2         26b2eb03618e   2 years ago      25.4MB
+[root@localhost ~]# docker push 192.168.122.1:5000/zzyyubuntu:1.2
+The push refers to repository [192.168.122.1:5000/zzyyubuntu]
+168afbf89013: Pushed 
+123a078714d5: Pushed 
+1.2: digest: sha256:2bfddb1e73e8d8f087f97c2ece11e0014adbbfff7f6e5a1cf2064b2ccc7baf38 size: 741
+[root@localhost ~]# curl -XGET http://192.168.122.1:5000/v2/_catalog
+{"repositories":["zzyyubuntu"]}
+[root@localhost ~]# docker rmi -f 192.168.122.1:5000/zzyyubuntu
+Error response from daemon: No such image: 192.168.122.1:5000/zzyyubuntu:latest
+[root@localhost ~]# docker rmi -f 192.168.122.1:5000/zzyyubuntu:1.2
+Untagged: 192.168.122.1:5000/zzyyubuntu:1.2
+Untagged: 192.168.122.1:5000/zzyyubuntu@sha256:2bfddb1e73e8d8f087f97c2ece11e0014adbbfff7f6e5a1cf2064b2ccc7baf38
+[root@localhost ~]# docker images
+REPOSITORY     TAG       IMAGE ID       CREATED          SIZE
+zzyyubuntu     1.2       0e5adac8f870   35 minutes ago   138MB
+atMain/myubt   1.3       d6ac6af504c8   8 days ago       208MB
+tomcat         latest    c4f54354c57b   2 weeks ago      435MB
+redis          latest    4326c43a061b   2 weeks ago      139MB
+registry       latest    99b916d8206b   3 weeks ago      57.7MB
+ubuntu         latest    493218ed0f40   5 weeks ago      78.1MB
+registry       2         26b2eb03618e   2 years ago      25.4MB
+[root@localhost ~]# docker pull 192.168.122.1:5000/zzyyubuntu:1.2
+1.2: Pulling from zzyyubuntu
+Digest: sha256:2bfddb1e73e8d8f087f97c2ece11e0014adbbfff7f6e5a1cf2064b2ccc7baf38
+Status: Downloaded newer image for 192.168.122.1:5000/zzyyubuntu:1.2
+192.168.122.1:5000/zzyyubuntu:1.2
+[root@localhost ~]# docker images
+REPOSITORY                      TAG       IMAGE ID       CREATED          SIZE
+192.168.122.1:5000/zzyyubuntu   1.2       0e5adac8f870   36 minutes ago   138MB
+zzyyubuntu                      1.2       0e5adac8f870   36 minutes ago   138MB
+atMain/myubt                    1.3       d6ac6af504c8   8 days ago       208MB
+tomcat                          latest    c4f54354c57b   2 weeks ago      435MB
+redis                           latest    4326c43a061b   2 weeks ago      139MB
+registry                        latest    99b916d8206b   3 weeks ago      57.7MB
+ubuntu                          latest    493218ed0f40   5 weeks ago      78.1MB
+registry                        2         26b2eb03618e   2 years ago      25.4MB
+[root@localhost ~]# 
