@@ -1,0 +1,41 @@
+docker run -it --privileged=true-v/宿主机 绝对路径 目录:/容器内目录 镜像名
+//docker run:启动一个新的容器
+//-it保持标准输入打开+分配一个伪终端(shell)
+// --privileged=true:开启"特权模式"
+//-v/宿主机 绝对路径 目录:/容器内目录:把宿主机的一个目录,映射到容器内部
+//-v:相当于挂个指针或者硬盘指向外部文件作为绑定
+//镜像名:docker会基于这个镜像创建容器
+
+数据卷特点:
+1数据卷可以在容器之间共享或重用数据
+2卷中的更改可以实时生效
+3数据卷中的更改不会包含在镜像更新中
+4数据卷的生命周期一直持续到没有容器使用它为止.
+
+数据卷解决的痛点:防止容器kill了之后里面的数据全消失,所以把数据放在宿主机的目录中,好似MySQL虽然关闭了,但是数据依然存在
+
+docker run -it --privileged=true -v /tmp/host_data:/tmp/docker_data  --name=u1 ubuntu
+//我们在/tmp/docker_data下做的操作会被映射到/tmp/host_data中
+
+root@24c6528d26f8:/tmp/docker_data# touch dockerin.txt
+//touch会创建/更新一个文件,虽然我们在容器内进行操作,但是它会把我们的操作映射到宿主机
+
+echo 'hello docker'>a.txt
+//echo是一个写入/创建命令,如果没有文件,就创建再写入,如果有就覆盖,如果要追加,则需要">>",也就是echo 'hello docker'>>a.txt
+
+cat a.txt
+//cat在ubuntu系统中是读取命令
+
+我们在容器下产生的操作会在宿主机中实现,反之亦然,准确来说,数据卷更像是一个共享目录
+
+docker inspect 容器id
+//查看容器的具体信息
+
+疑问点:docker ps 和docker images的命令不同之处
+解答:docker images指的是我pull下来的镜像,而我需要用docker run去跑一个镜像在容器中,docker ps也就是查看目前正在运行的容器
+
+之后我stop了容器,在宿主机端继续修改,重新把容器开起来,容器中依然映射了宿主机端的修改
+>
+>
+>
+>测试完成!
