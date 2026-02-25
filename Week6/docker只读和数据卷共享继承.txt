@@ -1,0 +1,54 @@
+//rw:可读可写
+//ro:可读不可写
+
+docker run -it --privileged=true -v /mydocker/u:/tmp/u:ro --name u2 ubuntu
+//":ro"就是read-only
+
+
+//数据卷的继承与共享---------------------------------------------------------------------------
+
+docker run -it --privileged=true --volumes-from u1 --name u2 ubuntu /bin/bash
+//让u2继承u1
+//--volumes-from此命令为创建＋启动一个全新容器,如果name的u2已经存在,则会报错
+
+
+root@163d63124578:/# cd /tmp/u
+root@163d63124578:/tmp/u# ls
+a.txt  host.txt  u1data.txt
+//在u2下查看了之前主机创建的host.txt,发现有
+
+root@1c9b4eafb395:/tmp/u# ls
+a.txt  host.txt  u1data.txt  u2data.txt
+//在u1下查看文件,发现有host.txt
+
+//验证---------------------------------------------------------------------------------------
+
+root@1c9b4eafb395:/tmp/u# exit   
+exit
+//我将u1退出
+
+[root@localhost u]# touch host2.txt
+//在主机目录创建host2.txt
+
+root@163d63124578:/tmp/u# ls -l
+total 4
+-rw-r--r--. 1 root root 12 Feb 25 15:28 a.txt
+-rw-r--r--. 1 root root  0 Feb 25 15:36 host.txt
+-rw-r--r--. 1 root root  0 Feb 25 16:01 host2.txt
+-rw-r--r--. 1 root root  0 Feb 25 15:33 u1data.txt
+-rw-r--r--. 1 root root  0 Feb 25 15:55 u2data.txt
+//在u2容器中查看,一样有host2.txt
+
+
+
+此后我重新在u2创建u2datav2.txt,再把u1开起来,发现u1有u2datav2.txt
+思考:如果u1是父类,为什么u1关闭状态下u2创建的文件,在u1重启之后还能找到?
+回答:实际上只是u2和u1共享数据卷,
+结构并不是:u1-->u2
+而是:       docker_volume
+                    /   \
+                  u1   u2
+
+本质上来说,两个容器用的是同一个数据卷,数据卷不属于u1和u2,它属于docker本身
+
+--volumes-from u1 这个命令容易误导,它只是说复制u1的卷挂载配置,而不是u1是u2的父类
