@@ -1,0 +1,159 @@
+docker pull redis
+//拉取redis镜像
+
+[root@localhost ~]# docker run -d -p 6379:6379 redis
+//启动redis
+
+
+[root@localhost ~]# docker ps
+CONTAINER ID   IMAGE     COMMAND                   CREATED         STATUS         PORTS                                       NAMES
+a3763416aa46   redis     "docker-entrypoint.s…"   5 seconds ago   Up 3 seconds   0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   affectionate_ramanujan
+[root@localhost ~]# docker exec -it a3763416aa46 /bin/bash
+//进入redis
+
+root@a3763416aa46:/data# redis-cli
+//启动redis客户端
+
+127.0.0.1:6379> set k1 v1
+OK
+127.0.0.1:6379> get k1
+"v1"
+
+
+mkdir -p /app/redis
+//在根目录 / 下创建 app 文件夹,然后在 app 下面创建 redis 文件夹
+//-p 的作用是：如果父目录不存在，就一并创建,如果目录已经存在，也不会报错
+
+[root@localhost redis]# cat redis.conf
+# ===============================
+# 网络配置
+# ===============================
+
+bind 0.0.0.0
+protected-mode yes
+port 6379
+tcp-backlog 511
+timeout 0
+tcp-keepalive 300
+
+# ===============================
+# 通用配置
+# ===============================
+
+daemonize no
+supervised no
+pidfile /var/run/redis_6379.pid
+loglevel notice
+logfile ""
+
+databases 16
+
+# ===============================
+# 持久化配置（RDB）
+# ===============================
+
+save 900 1
+save 300 10
+save 60 10000
+
+stop-writes-on-bgsave-error yes
+rdbcompression yes
+rdbchecksum yes
+dbfilename dump.rdb
+dir /data
+
+# ===============================
+# AOF 持久化（默认关闭）
+# ===============================
+
+appendonly no
+appendfilename "appendonly.aof"
+appendfsync everysec
+
+# ===============================
+# 内存管理
+# ===============================
+
+maxmemory-policy noeviction
+
+# ===============================
+# 安全（默认无密码，如需要可打开）
+# ===============================
+
+# requirepass yourpassword
+[root@localhost redis]# pwd
+/app/redis
+//建立自己的redis.conf文件
+//之后开始验证
+
+
+[root@localhost redis]# docker run -p 6379:6379 --name myr3 --privileged=true \
+> -v /app/redis/redis.conf:/etc/redis/redis.conf \
+> -v /app/redis/data:/data \
+> -d redis:latest redis-server /etc/redis/redis.conf
+//-d:后台运行.     redis-sever /etc/redis/redis.conf:启动redis服务并使用后面的配置
+ed34f2132706a323b9be2c714036bf939f1ac078e613f9d457aa57825e283f6c
+//继续将redis与宿主机进行数据卷绑定
+
+
+ps:docker的代码结构是   docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+//用某些[OPTIONS]选项,基于IMAGE镜像,来运行COMMAND命令
+
+ [OPTIONS]:-p 6379:6379 --name myr3 --privileged=true \
+> -v /app/redis/redis.conf:/etc/redis/redis.conf \
+> -v /app/redis/data:/data \
+> -d
+//告诉docker:端口如何映射,容器叫什么,是否特权,数据卷如何挂,是否后台
+
+IMAGE:redis:latest
+//用哪个镜像来启动容器
+
+[COMMAND]:redis-server /etc/redis/redis.conf
+//容器执行之后运行这个命令
+
+
+
+[root@localhost redis]# docker ps
+CONTAINER ID   IMAGE          COMMAND                   CREATED         STATUS         PORTS                                       NAMES
+ed34f2132706   redis:latest   "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes   0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   myr3
+//马上查看容器
+
+
+[root@localhost redis]# docker exec -it myr3 /bin/bash
+root@ed34f2132706:/data# redis-cli
+127.0.0.1:6379> 
+//进入并登录redis客户端
+
+
+
+
+databases 16
+//之前我的redis.conf自己配置了只有16个库,现在开始验证自己的配置文件是否生效
+
+127.0.0.1:6379> select 15
+OK
+127.0.0.1:6379[15]> select 10
+OK
+127.0.0.1:6379[10]> select 18
+(error) ERR DB index is out of range
+127.0.0.1:6379[10]> 
+
+
+
+[root@localhost redis]# vim redis.conf
+[root@localhost redis]# 
+//重新把/app/redis.conf的databases从16改成10
+
+[root@localhost redis]# docker exec -it myr3 /bin/bash
+root@ed34f2132706:/data# redis-cli
+127.0.0.1:6379> get k1
+"v1"
+127.0.0.1:6379> select 3
+OK
+127.0.0.1:6379[3]> select 15
+(error) ERR DB index is out of range
+127.0.0.1:6379[3]> 
+//之前选15是可以的,但是修改之后就不能选15了,这代表我们可以自己选择自己需要的库
+//而且我是在宿主机中进行修改,但是redis也继承了我宿主机的修改
+
+//验证完毕
