@@ -1,0 +1,289 @@
+docker run -p 3307:3306 --name mysql-master \
+-v /mydata/mysql-master/log:/var/log/mysql \
+-v /mydata/mysql-master/data:/var/lib/mysql \
+-v /mydata/mysql-master/conf:/etc/mysql \
+-e MYSQL_ROOT_PASSWORD=root \
+-d mysql:5.7
+//mysql继承
+
+[root@localhost mydata]# cd /mydata/mysql-master/conf
+[root@localhost conf]# 
+//宿主机目录
+
+[root@localhost conf]# vim my.conf
+[root@localhost conf]# cat my.conf
+erver_id，同一局域网中需要唯一
+server_id=101
+
+## 指定不需要同步的数据库名称
+binlog-ignore-db=mysql
+
+## 开启二进制日志功能
+log-bin=mall-mysql-bin
+
+## 设置二进制日志使用内存大小（事务）
+binlog_cache_size=1M
+
+## 设置使用的二进制日志格式（mixed, statement, row）
+binlog_format=mixed
+
+## 二进制日志过期时间，默认值为0，表示不自动清理
+expire_logs_days=7
+
+## 跳过主从复制中的错误，避免slave复制中断
+## 如：1062错误是指一些主键重复，1032错误是因为主从数据库数据不一致
+slave_skip_errors=1062
+//建立.conf配置文件
+
+[root@localhost conf]# docker rm mysql-master
+mysql-master
+[root@localhost conf]# mkdir -p /mydata/mysql-master/conf
+[root@localhost conf]# mkdir -p /mydata/mysql-master/data
+[root@localhost conf]# mkdir -p /mydata/mysql-master/log
+[root@localhost conf]# docker run -p 3307:3306 --name mysql-master \
+> -v /mydata/mysql-master/log:/var/log/mysql \
+> -v /mydata/mysql-master/data:/var/lib/mysql \
+> -v /mydata/mysql-master/conf:/etc/mysql/conf.d \
+> -e MYSQL_ROOT_PASSWORD=root \
+> -d mysql:5.7
+e8289398ab476367d149e1d2ffa3509983711eee8005aa3dd31169582e2dca9e
+[root@localhost conf]# docker ps
+CONTAINER ID   IMAGE       COMMAND                   CREATED         STATUS         PORTS                                                  NAMES
+e8289398ab47   mysql:5.7   "docker-entrypoint.s…"   7 seconds ago   Up 7 seconds   33060/tcp, 0.0.0.0:3307->3306/tcp, :::3307->3306/tcp   mysql-master
+
+//因为教材过于老旧,所以发生了配置文件挂载的错误,具体为,mysql找不到挂载文件,在开启之后又立马跳闸了,所以docker ps就一直看不到docker的up状态
+
+进入mysql开始授权用户,给用户一个权限,让他可以访问我们的数据库
+
+CREATE USER 'slave'@'%' IDENTIFIED BY '123456';
+//CREATE USER是创建一个用户
+//'slave'是用户名
+//@'%':slave用户可以从任何主机登录.比如@'localhost'是只能本机登录
+//IDENTIFIED BY '123456':密码为123456
+
+GRANT REPLICATION SLAVE ON *.* TO 'slave'@'%';
+//给予权限
+
+
+docker run -p 3308:3306 --name mysql-slave \
+-v /mydata/mysql-slave/log:/var/log/mysql \
+-v /mydata/mysql-slave/data:/var/lib/mysql \
+-v /mydata/mysql-slave/conf:/etc/mysql/conf.d \
+-e MYSQL_ROOT_PASSWORD=root \
+-d mysql:5.7
+//建立一个从服务器
+
+[root@localhost conf]# vim my.cnf
+[root@localhost conf]# cat my.cnf
+[mysqld]
+## 设置server_id，同一局域网中需要唯一
+server_id=102
+
+## 指定不需要同步的数据库名称
+binlog-ignore-db=mysql
+
+## 开启二进制日志功能，以备Slave作为其它数据库实例的Master时使用
+log-bin=mall-mysql-slave1-bin
+
+## 设置二进制日志缓存大小（事务）
+binlog_cache_size=1M
+
+## 设置使用的二进制日志格式（mixed,statement,row）
+binlog_format=mixed
+
+## 二进制日志过期时间，默认值为0，表示不自动清理
+expire_logs_days=7
+
+## 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave复制中断
+slave_skip_errors=1062
+
+##relay_log配置中继日志
+relay_log=mall-mysql-relay-bin
+
+//增加配置文件
+
+[root@localhost conf]# docker restart mysql-slave
+mysql-slave
+[root@localhost conf]# docker ps
+CONTAINER ID   IMAGE       COMMAND                   CREATED          STATUS          PORTS                                                  NAMES
+28b53a34f08e   mysql:5.7   "docker-entrypoint.s…"   3 minutes ago    Up 3 seconds    33060/tcp, 0.0.0.0:3308->3306/tcp, :::3308->3306/tcp   mysql-slave
+e8289398ab47   mysql:5.7   "docker-entrypoint.s…"   16 minutes ago   Up 16 minutes   33060/tcp, 0.0.0.0:3307->3306/tcp, :::3307->3306/tcp   mysql-master
+//查看容器实列
+
+mysql> show  master status;
++-----------------------+----------+--------------+------------------+-------------------+
+| File                  | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++-----------------------+----------+--------------+------------------+-------------------+
+| mall-mysql-bin.000001 |      154 |              | mysql            |                   |
++-----------------------+----------+--------------+------------------+-------------------+
+1 row in set (0.00 sec)
+//在宿主机进行检验配置,成功
+
+change master to
+master_host='192.168.122.1',
+master_user='slave',
+master_password='123456',
+master_port=3307,
+master_log_file='mall-mysql-bin.000001',
+master_log_pos=617,
+master_connect_retry=30;
+//在从机配置文件
+//master_user='slave',:连接主机时专用的账号
+//master_port=3307,:访问3307端口,因为主机是3307
+//master_log_file='mall-mysql-bin.000001',:'mall-mysql-bin.000001'为主机的show master status
+
+[MySQL 主从复制原理：
+
+Master 写 binlog
+Slave 读取 binlog
+Slave 执行 binlog]
+
+192.168.122.1
+//主机ip
+
+
+在从数据库中查看主从配置--------------------------------------------------
+show slave status \G;
+
+mysql> show slave status \G;
+*************************** 1. row ***************************
+               Slave_IO_State: 
+                  Master_Host: 192.168.122.1
+                  Master_User: slave
+                  Master_Port: 3307
+                Connect_Retry: 30
+              Master_Log_File: mall-mysql-bin.000001
+          Read_Master_Log_Pos: 617
+               Relay_Log_File: mall-mysql-relay-bin.000001
+                Relay_Log_Pos: 4
+        Relay_Master_Log_File: mall-mysql-bin.000001
+             Slave_IO_Running: No
+            Slave_SQL_Running: No
+              Replicate_Do_DB: 
+          Replicate_Ignore_DB: 
+           Replicate_Do_Table: 
+       Replicate_Ignore_Table: 
+      Replicate_Wild_Do_Table: 
+  Replicate_Wild_Ignore_Table: 
+                   Last_Errno: 0
+                   Last_Error: 
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 617
+              Relay_Log_Space: 154
+              Until_Condition: None
+               Until_Log_File: 
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File: 
+           Master_SSL_CA_Path: 
+              Master_SSL_Cert: 
+            Master_SSL_Cipher: 
+               Master_SSL_Key: 
+        Seconds_Behind_Master: NULL
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error: 
+               Last_SQL_Errno: 0
+               Last_SQL_Error: 
+  Replicate_Ignore_Server_Ids: 
+             Master_Server_Id: 0
+                  Master_UUID: 
+             Master_Info_File: /var/lib/mysql/master.info
+                    SQL_Delay: 0
+          SQL_Remaining_Delay: NULL
+      Slave_SQL_Running_State: 
+           Master_Retry_Count: 86400
+                  Master_Bind: 
+      Last_IO_Error_Timestamp: 
+     Last_SQL_Error_Timestamp: 
+               Master_SSL_Crl: 
+           Master_SSL_Crlpath: 
+           Retrieved_Gtid_Set: 
+            Executed_Gtid_Set: 
+                Auto_Position: 0
+         Replicate_Rewrite_DB: 
+                 Channel_Name: 
+           Master_TLS_Version: 
+1 row in set (0.00 sec)
+
+
+mysql> start slave;
+mysql> stop slave;
+Query OK, 0 rows affected, 1 warning (0.00 sec)
+
+mysql> reset slave;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> change master to
+    -> master_host='192.168.122.1',
+    -> master_user='slave',
+    -> master_password='123456',
+    -> master_port=3307,
+    -> master_log_file='mall-mysql-bin.000001',
+    -> master_log_pos=154,
+    -> master_connect_retry=30;
+Query OK, 0 rows affected, 2 warnings (0.01 sec)
+
+mysql> start slave;
+Query OK, 0 rows affected (0.00 sec)
+//因为之前的read_master_log_pos:617太大了,所以重新改正一下
+
+
+在master里面执行mysql> create database testdb;
+Query OK, 1 row affected (0.01 sec)
+
+在slave里面查看ysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| testdb             |
++--------------------+
+5 rows in set (0.01 sec)
+
+//测试成功
+
+
+-----------------------------------------------总结---------------------------------------------------
+//原理:当sql执行insert/update/delete的时候,mysql会sql执行--->写入binlog--->slave读取binlog
+
+GRANT REPLICATION SLAVE ON *.* TO 'slave'@'%';
+给了slave用户权限去读取binlog
+
+show master status;
+获取master日志位置,
+
+得到:
+File: mall-mysql-bin.000001
+Position: 154
+
+file:binlog的位置
+psition:当前写入位置
+
+binlog就像:
+mall-mysql-bin.000001
+│
+├── 1
+├── 100
+├── 154
+├── 300
+
+slave必须知道从哪里开始复制,所以需要file＋position
+
+
+change master to
+master_host='192.168.122.1',//主机IP
+master_user='slave',//同步用户
+master_password='123456',//密码
+master_port=3307,//主机端口
+master_log_file='mall-mysql-bin.000001',//master的binlog文件
+master_log_pos=154;//复制起点
+
+配置slave去连接master
+
+
+底层逻辑:
+连接master-->读取master的bingo-->下载到relay log-->执行sql
